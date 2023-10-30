@@ -4,6 +4,7 @@ import postgres from 'postgres';
 import jwt from 'jsonwebtoken';
 import auth from '../middleware/autenticacion.js';
 
+
 const sql = postgres({
     host: '127.0.0.1',
     port: 5432,
@@ -21,8 +22,11 @@ function routes(app){
             res.send(false)
         }else{
             let token = jwt.sign({"usuario": response[0].id_usuario},'cualquiercosa')
-            res.send(token)
+            res.json({token}) //Se envia el token
         }
+    })
+
+    app.post('/register', async (req, res) => {
     })
 
 
@@ -44,7 +48,7 @@ function routes(app){
         }
         
     })
-    app.get('/Usuario', auth, async (req, res) => {
+    app.get('/usuario', auth, async (req, res) => {
         try {
             let usuario = await sql`
             select * from usuarios
