@@ -25,6 +25,7 @@ function routes(app){
         }
     })
 
+
     app.get('/leerTema', auth, async (req, res) => {
         
         try {
@@ -42,6 +43,20 @@ function routes(app){
             res.status(500).send()
         }
         
+    })
+    app.get('/Usuario', auth, async (req, res) => {
+        try {
+            let usuario = await sql`
+            select * from usuarios
+            where usuarios.id_usuario = ${req.id_usuario}
+            `
+
+            res.json(usuario) //array completo
+        }
+        catch(e){
+            console.log(e)
+            res.status(500).send()
+        }
     })
 
     app.get('/perrosUsuario', auth, async (req, res) => {
