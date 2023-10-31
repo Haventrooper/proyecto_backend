@@ -30,24 +30,6 @@ function routes(app){
     })
 
 
-    app.get('/leerTema', auth, async (req, res) => {
-        
-        try {
-            let tema = await sql`
-            select temas.tema
-            from usuarios join temas
-            on usuarios.id_tema = temas.id_tema
-            where usuarios.id_usuario = ${req.id_usuario}
-        `
-            res.json(tema[0]) //primer tema
-
-        }
-        catch(e){
-            console.log(e)
-            res.status(500).send()
-        }
-        
-    })
     app.get('/usuario', auth, async (req, res) => {
         try {
             let usuario = await sql`
@@ -66,8 +48,9 @@ function routes(app){
     app.get('/perrosUsuario', auth, async (req, res) => {
         try {
             let perros = await sql`
-            select * from perros
-            where perros.id_usuario = ${req.id_usuario}
+            SELECT perros.*, razas.nombre AS nombre_raza 
+            FROM perros JOIN razas ON perros.id_raza = razas.id_raza
+            WHERE perros.id_usuario = ${req.id_usuario}
             `
 
             res.json(perros) //array completo
@@ -77,6 +60,26 @@ function routes(app){
             res.status(500).send()
         }
     })
+
+    app.get('/leerTema', auth, async (req, res) => {
+        
+        try {
+            let tema = await sql`
+            select temas.tema
+            from usuarios join temas
+            on usuarios.id_tema = temas.id_tema
+            where usuarios.id_usuario = ${req.id_usuario}
+        `
+            res.json(tema[0]) //primer tema
+
+        }
+        catch(e){
+            console.log(e)
+            res.status(500).send()
+        }
+        
+    })
+    
 
 }
 export default routes
