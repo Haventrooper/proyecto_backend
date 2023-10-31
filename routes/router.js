@@ -29,6 +29,20 @@ function routes(app){
     app.post('/register', async (req, res) => {
     })
 
+    app.get('/nombreUsuario', auth, async (req, res)=>{
+        try{
+            let nombreUsuario = await sql`
+            SELECT nombre
+            FROM usuarios
+            WHERE id_usuario = ${req.id_usuario}
+            `            
+            res.json({nombre: nombreUsuario[0].nombre})
+        }
+        catch (e) {
+            console.log(e);
+            res.status(500).json({ message: 'Error en el servidor' });
+          }
+    })
 
     app.get('/usuario', auth, async (req, res) => {
         try {
@@ -50,7 +64,7 @@ function routes(app){
             let perros = await sql`
             SELECT perros.*, razas.nombre AS nombre_raza 
             FROM perros JOIN razas ON perros.id_raza = razas.id_raza
-            WHERE perros.id_usuario = ${req.id_usuario}
+            WHERE perros.id_usuario =${req.id_usuario}
             `
 
             res.json(perros) //array completo
