@@ -13,6 +13,7 @@ const sql = postgres({
 })
 
 function routes(app){
+
     app.get('/login', async (req, res) => {
         let response = await sql`
         select * from usuarios 
@@ -26,8 +27,27 @@ function routes(app){
         }
     })
 
-    app.post('/register', async (req, res) => {
-    })
+
+    app.post('/signup', async (req, res) => {
+
+        let {id_tema, nombre, apellido, email, contrasena, fecha_creacion, fecha_nacimiento, sin_perro } = req.body;
+        
+        try {
+    
+            let result = await sql`
+            INSERT INTO usuarios (id_tema, nombre, apellido, email, contrasena, fecha_creacion, fecha_nacimiento, sin_perro)
+            VALUES (${id_tema}, ${nombre}, ${apellido}, ${email}, ${contrasena}, ${fecha_creacion}, ${fecha_nacimiento}, ${sin_perro})
+            `;
+            
+            res.status(201).json({ mensaje: 'Usuario registrado con éxito' });
+        } 
+        catch (error) {
+            console.error('Error al registrar el usuario:', error);
+            res.status(500).json({ mensaje: 'Error al registrar el usuario' });
+        }
+    });
+    
+
 
     app.get('/nombreUsuario', auth, async (req, res)=>{
         try{
