@@ -31,18 +31,51 @@ function routes(app){
 
     app.get('/nombreUsuario', auth, async (req, res)=>{
         try{
-            let nombreUsuario = await sql`
+            let username = await sql`
             SELECT nombre
             FROM usuarios
             WHERE id_usuario = ${req.id_usuario}
             `            
-            res.json({nombre: nombreUsuario[0].nombre})
+            res.json({nombre: username[0].nombre})
         }
         catch (e) {
             console.log(e);
             res.status(500).json({ message: 'Error en el servidor' });
           }
     })
+    app.get('/actividades', auth, async (req, res) => {
+        try {
+            let actividades = await sql `
+            select * from actividades
+            `
+
+            res.json(actividades)
+        }
+        catch(e) {
+            console.log(e);
+            res.status(500).send()
+        }
+    });
+
+    app.get('/getActividad/:id_actividad', auth, async (req, res) => {
+        try {
+          const id_actividad = req.params.id_actividad; // Obtener el ID de la actividad de la ruta
+          const actividad = await sql`
+            SELECT * FROM actividades
+            WHERE id_actividad = ${id_actividad};
+          `;
+      
+          if (actividad && actividad.length > 0) {
+            res.json(actividad[0]); // Devolver la primera actividad (asumiendo que el ID es único)
+          } else {
+            res.status(404).json({ mensaje: 'Actividad no encontrada' });
+          }
+        } catch (e) {
+          console.log(e);
+          res.status(500).send();
+        }
+      });
+      
 
     app.get('/usuario', auth, async (req, res) => {
         try {
@@ -51,7 +84,7 @@ function routes(app){
             where usuarios.id_usuario = ${req.id_usuario}
             `
 
-            res.json(usuario) //array completo
+            res.json(usuario[0]) //array completo
         }
         catch(e){
             console.log(e)
