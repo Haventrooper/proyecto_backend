@@ -79,14 +79,14 @@ function routes(app){
 
     app.get('/getActividad/:id_actividad', auth, async (req, res) => {
         try {
-          const id_actividad = req.params.id_actividad; // Obtener el ID de la actividad de la ruta
+          const id_actividad = req.params.id_actividad;
           const actividad = await sql`
             SELECT * FROM actividades
             WHERE id_actividad = ${id_actividad};
           `;
       
           if (actividad && actividad.length > 0) {
-            res.json(actividad[0]); // Devolver la primera actividad (asumiendo que el ID es único)
+            res.json(actividad[0]);
           } else {
             res.status(404).json({ mensaje: 'Actividad no encontrada' });
           }
@@ -147,6 +147,18 @@ function routes(app){
         
     })
     
+    app.get('/categorias', auth, async (req, res) => {
+        try {
+            let categorias = await sql`
+            select * from categorias
+            `
+            res.json(categorias)
+        }
+        catch(error){
+            console.log(error)
+            res.status(500).send()
+        }
+    })
 
 }
 export default routes
