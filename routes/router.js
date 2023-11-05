@@ -77,6 +77,21 @@ function routes(app){
         }
     });
 
+    app.get('/getPasos/:id_actividad', auth, async (req, res) => {
+        try {
+            const id_actividad = req.params.id_actividad;
+            const pasos = await sql`
+            select * from pasos
+            where id_actividad = ${id_actividad};
+            `;
+            res.json(pasos)
+
+        }catch(error){
+            console.log(error);
+            res.status(500).send();
+        }
+    });
+
     app.get('/getActividad/:id_actividad', auth, async (req, res) => {
         try {
           const id_actividad = req.params.id_actividad;
@@ -128,6 +143,27 @@ function routes(app){
         }
     })
 
+    app.get('/perro/:id_perro', auth, async (req, res) => {
+        try {
+          const id_perro = req.params.id_perro;
+          const perro = await sql`
+          SELECT Perros.*, Razas.nombre AS nombre_raza
+          FROM Perros
+          INNER JOIN Razas ON Perros.id_raza = Razas.id_raza
+          WHERE Perros.id_perro = ${id_perro};
+          `;
+      
+          if (perro && perro.length > 0) {
+            res.json(perro);
+          } else {
+            res.status(404).json({ mensaje: 'Perro no encontrado' });
+          }
+        } catch (e) {
+          console.log(e);
+          res.status(500).send();
+        }
+      });
+
     app.get('/leerTema', auth, async (req, res) => {
         
         try {
@@ -160,5 +196,46 @@ function routes(app){
         }
     })
 
+    app.get('/actividadesPorCategoria/:id_categoria', auth, async (req, res) => {
+        try {
+            const id_categoria = req.params.id_categoria;
+            let actividadesCat = await sql`
+            select * from actividades
+            where id_categoria = ${id_categoria}
+            `
+            res.json(actividadesCat)
+        }
+        catch(error){
+            console.log("Error al obtener actividades por categorias");
+            res.status(500).send()
+        }
+    })
+
+    app.get('/sugerencias', auth, async (req, res)=> {
+        try {
+            const sugerencias = await sql`
+            select * from sugerencias
+            `;
+            res.json(sugerencias)
+        }catch(error){
+            console.log("Error al obtener sugerencias")
+            res.status(500),send()
+        }
+    });
+
+    app.get('/sugerencias/:id_raza', auth, async (req, res) =>{
+        try{
+            const id_raza = req.params.id_raza;
+            let sugerenciaRaza = await sql`
+            select * from sugerencias
+            where id_raza = ${id_raza}
+            `;
+            res.json(sugerenciaRaza);
+        }
+        catch(error){
+            console.log("Error al obtener sugerencia por raza");
+            res.status(500).send();
+        }
+    })
 }
 export default routes
