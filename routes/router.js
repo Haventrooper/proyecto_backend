@@ -311,5 +311,23 @@ function routes(app){
         }
       });
       
+      app.put('/modificarPerro/:id_perro', auth, async (req, res) => {
+        const id_perro = req.params.id_perro;
+        const { id_raza, nombre, fecha_nacimiento, genero } = req.body;
+      
+        try {
+          const actualizacionPerro = await sql`
+            UPDATE perros
+            SET id_raza = ${id_raza}, nombre = ${nombre}, fecha_nacimiento = ${fecha_nacimiento}, genero = ${genero}
+            WHERE id_perro = ${id_perro}
+          `;
+      
+          res.status(200).json({ mensaje: 'El perro se ha modificado correctamente' });
+        } catch (error) {
+          console.error('Error al modificar el perro:', error);
+          res.status(500).json({ mensaje: 'Error al modificar el perro' });
+        }
+      });
+      
 }
 export default routes
