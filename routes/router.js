@@ -289,7 +289,27 @@ function routes(app){
             console.error('Error al guardar actividad:', error);
             res.status(500).json({ mensaje: 'Error al guardar actividad' });
         }
-      
       });
+
+      //PUT
+
+      app.put('/modificarUsuario', auth, async (req, res) => {
+
+        const { nombre, apellido, email, fecha_nacimiento } = req.body;
+      
+        try {
+          let result = await sql`
+            UPDATE usuarios
+            SET nombre = ${nombre}, apellido = ${apellido}, email = ${email}, fecha_nacimiento = ${fecha_nacimiento}
+            WHERE id_usuario = ${req.id_usuario}
+          `;
+      
+          res.status(200).json({ mensaje: 'Datos de usuario actualizados con éxito' });
+        } catch (error) {
+          console.error('Error al actualizar los datos de usuario:', error);
+          res.status(500).json({ mensaje: 'Error al actualizar los datos de usuario' });
+        }
+      });
+      
 }
 export default routes
