@@ -231,7 +231,7 @@ function routes(app){
             console.log("Error al obtener actividad por id");
             res.status(500).send();
         }        
-    })
+    });
 
     //POST
     
@@ -272,6 +272,25 @@ function routes(app){
           res.status(500).json({ mensaje: 'Error al registrar el perro' });
         }
       });
+
+      app.post('/guardarActividad/:id_perro/:id_actividad', auth, async (req, res) => {        
+        const idPerro = req.body.id_perro;
+        const idActividad = req.body.id_actividad;
+
+        
+        try {
+            const registroActividad = await sql`
+            insert into actividades_perros (id_perro, id_actividad)
+            values (${idPerro},${idActividad});
+            `
+
+            res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
+        }
+        catch(error){
+            console.error('Error al guardar actividad:', error);
+            res.status(500).json({ mensaje: 'Error al guardar actividad' });
+        }
       
+      });
 }
 export default routes
