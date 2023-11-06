@@ -216,6 +216,23 @@ function routes(app){
         }
     });
 
+    app.get('/actividadPerro/:id_perro', auth, async (req, res) => {
+        try{
+        const id_perro = req.params.id_perro;
+        const actividadPerro = await sql`
+        SELECT actividades.*, actividades_perros.id_perro
+        FROM actividades
+        INNER JOIN actividades_perros ON actividades.id_actividad = actividades_perros.id_actividad
+        WHERE actividades_perros.id_perro = ${id_perro};
+        `
+        res.json(actividadPerro);
+        }
+        catch(error){
+            console.log("Error al obtener actividad por id");
+            res.status(500).send();
+        }        
+    })
+
     //POST
     
     app.post('/signup', async (req, res) => {
