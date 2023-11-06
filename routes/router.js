@@ -274,10 +274,9 @@ function routes(app){
       });
 
       app.post('/guardarActividad/:id_perro/:id_actividad', auth, async (req, res) => {        
-        const idPerro = req.body.id_perro;
-        const idActividad = req.body.id_actividad;
+        const idPerro = req.params.id_perro;
+        const idActividad = req.params.id_actividad;
 
-        
         try {
             const registroActividad = await sql`
             insert into actividades_perros (id_perro, id_actividad)
