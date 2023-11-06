@@ -328,6 +328,5 @@ function routes(app){
           res.status(500).json({ mensaje: 'Error al modificar el perro' });
         }
       });
-      
 }
 export default routes
