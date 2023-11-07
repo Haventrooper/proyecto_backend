@@ -374,6 +374,26 @@ function routes(app){
           res.status(500).json({ mensaje: 'Error al eliminar el perro' });
         }
       });
+
+      app.delete('/eliminarActividadPorPerro/:id_perro/:id_actividad', auth, async (req, res) => {
+        const idPerro = req.params.id_perro;
+        const idActividad = req.params.id_actividad;
       
+        try {
+          const eliminacionActividad = await sql`
+            DELETE FROM actividades_perros
+            WHERE id_perro = ${idPerro} AND id_actividad = ${idActividad}
+          `;
+      
+          if (eliminacionActividad && eliminacionActividad.rowCount > 0) {
+            res.status(200).json({ mensaje: 'La actividad del perro ha sido eliminada correctamente' });
+          } else {
+            res.status(404).json({ mensaje: 'No se encontró la actividad del perro para eliminar' });
+          }
+        } catch (error) {
+          console.error('Error al eliminar la actividad del perro:', error);
+          res.status(500).json({ mensaje: 'Error al eliminar la actividad del perro' });
+        }
+      });      
 }
 export default routes
