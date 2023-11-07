@@ -353,6 +353,12 @@ function routes(app){
       app.delete('/eliminarPerro/:id_perro', auth, async (req, res) => {
         const id_perro = req.params.id_perro;
         try {
+            await sql`
+            DELETE FROM actividades_perros
+            WHERE id_perro = ${id_perro}
+          `;
+      
+          // Luego, elimina el perro en la tabla perros
           const eliminacionPerro = await sql`
             DELETE FROM perros
             WHERE id_perro = ${id_perro}
