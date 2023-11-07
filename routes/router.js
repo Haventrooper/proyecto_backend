@@ -328,5 +328,28 @@ function routes(app){
           res.status(500).json({ mensaje: 'Error al modificar el perro' });
         }
       });
+
+      //DELETE
+
+      app.delete('/eliminarUsuario', auth, async (req, res) => {
+        try {
+          // Aquí realizamos la eliminación del usuario en la base de datos.
+          let result = await sql`
+            DELETE FROM usuarios
+            WHERE id_usuario = ${req.id_usuario}
+          `;
+          
+          if (result && result.rowCount > 0) {
+            res.status(200).json({ mensaje: 'Usuario eliminado con éxito' });
+          } else {
+            res.status(404).json({ mensaje: 'No se encontró el usuario para eliminar' });
+          }
+        } catch (error) {
+          console.error('Error al eliminar el usuario:', error);
+          res.status(500).json({ mensaje: 'Error al eliminar el usuario' });
+        }
+      });
+      
+
 }
 export default routes
