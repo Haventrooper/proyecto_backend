@@ -350,6 +350,24 @@ function routes(app){
         }
       });
       
-
+      app.delete('/eliminarPerro/:id_perro', auth, async (req, res) => {
+        const id_perro = req.params.id_perro;
+        try {
+          const eliminacionPerro = await sql`
+            DELETE FROM perros
+            WHERE id_perro = ${id_perro}
+          `;
+          
+          if (eliminacionPerro && eliminacionPerro.rowCount > 0) {
+            res.status(200).json({ mensaje: 'El perro ha sido eliminado correctamente' });
+          } else {
+            res.status(404).json({ mensaje: 'No se encontró el perro para eliminar' });
+          }
+        } catch (error) {
+          console.error('Error al eliminar el perro:', error);
+          res.status(500).json({ mensaje: 'Error al eliminar el perro' });
+        }
+      });
+      
 }
 export default routes
