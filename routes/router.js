@@ -88,6 +88,33 @@ function routes(app){
           res.status(500).send();
         }
       });
+
+      app.get('/verificarActividad/:id_perro/:id_actividad', auth, async (req, res) => {
+        
+        try {
+
+        const idPerro = req.params.id_perro;
+        const idActividad = req.params.id_actividad;
+        const actividadConsulta = await sql`
+            SELECT * FROM actividades_perros
+            WHERE id_perro = ${idPerro} AND id_actividad = ${idActividad};
+        `;
+
+        if (actividadConsulta && actividadConsulta.length > 0) {
+            // Si actividadConsulta tiene al menos una fila, significa que la actividad ya está guardada
+            // Puedes hacer lo que necesites hacer en este caso
+            res.status(200).json({mensaje: 'Actividad ya en BD'})
+          } else {
+            // No se encontraron coincidencias, lo que indica que la actividad aún no se ha guardado
+            // Puedes hacer lo que necesites hacer en este caso
+            res.status(204).json({mensaje: 'No hay actividad guardada en BD'})
+          }
+        } catch (error) {
+          console.error('Error al verificar la actividad:', error);
+          res.status(500).json({ mensaje: 'Error al verificar la actividad' });
+        }
+      });
+      
       
 
     app.get('/usuario', auth, async (req, res) => {
@@ -220,7 +247,7 @@ function routes(app){
         try{
         const id_perro = req.params.id_perro;
         const actividadPerro = await sql`
-        SELECT actividades.*, actividades_perros.id_perro
+        SELECT actividades.*, actividades_perros.id_perro, actividades_perros.contador
         FROM actividades
         INNER JOIN actividades_perros ON actividades.id_actividad = actividades_perros.id_actividad
         WHERE actividades_perros.id_perro = ${id_perro};
@@ -276,11 +303,12 @@ function routes(app){
       app.post('/guardarActividad/:id_perro/:id_actividad', auth, async (req, res) => {        
         const idPerro = req.params.id_perro;
         const idActividad = req.params.id_actividad;
+        const contador = req.body.contador;
 
         try {
             const registroActividad = await sql`
-            insert into actividades_perros (id_perro, id_actividad)
-            values (${idPerro},${idActividad});
+            insert into actividades_perros (id_perro, id_actividad, contador)
+            values (${idPerro},${idActividad},${contador});
             `
 
             res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
@@ -292,6 +320,26 @@ function routes(app){
       });
 
       //PUT
+
+      app.put('/actualizarActividad/:id_perro/:id_actividad', auth, async (req, res) => {        
+        const idPerro = req.params.id_perro;
+        const idActividad = req.params.id_actividad;
+        const nuevoContador = req.body.contador;
+    
+        try {
+            const actualizacionActividad = await sql`
+                UPDATE actividades_perros
+                SET contador = ${nuevoContador}
+                WHERE id_perro = ${idPerro} AND id_actividad = ${idActividad};
+            `;
+    
+            res.status(200).json({ mensaje: 'El contador de la actividad se ha actualizado correctamente' });
+        } catch (error) {
+            console.error('Error al actualizar el contador de la actividad:', error);
+            res.status(500).json({ mensaje: 'Error al actualizar el contador de la actividad' });
+        }
+    });
+    
 
       app.put('/modificarUsuario', auth, async (req, res) => {
 
