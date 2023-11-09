@@ -107,8 +107,8 @@ function routes(app){
           } else {
             // No se encontraron coincidencias, lo que indica que la actividad aún no se ha guardado
             // Puedes hacer lo que necesites hacer en este caso
-            res.status(204).json({mensaje: 'No hay actividad guardada en BD'})
-          }
+            res.status(404).json({ mensaje: 'No hay actividad guardada en BD' });
+        }
         } catch (error) {
           console.error('Error al verificar la actividad:', error);
           res.status(500).json({ mensaje: 'Error al verificar la actividad' });
