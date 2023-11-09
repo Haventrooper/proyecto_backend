@@ -325,6 +325,7 @@ function routes(app){
         const idPerro = req.params.id_perro;
         const idActividad = req.params.id_actividad;
         const nuevoContador = req.body.contador;
+        console.log(req.body)
     
         try {
             const actualizacionActividad = await sql`
@@ -332,7 +333,7 @@ function routes(app){
                 SET contador = ${nuevoContador}
                 WHERE id_perro = ${idPerro} AND id_actividad = ${idActividad};
             `;
-    
+            
             res.status(200).json({ mensaje: 'El contador de la actividad se ha actualizado correctamente' });
         } catch (error) {
             console.error('Error al actualizar el contador de la actividad:', error);
