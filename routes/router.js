@@ -3,6 +3,7 @@
 import postgres from 'postgres';
 import jwt from 'jsonwebtoken';
 import auth from '../middleware/autenticacion.js';
+import cron from "node-cron"
 
 
 const sql = postgres({
@@ -11,6 +12,7 @@ const sql = postgres({
     username: 'postgres',
     password: 'diego05211998'
 })
+
 
 function routes(app){
 
@@ -260,6 +262,25 @@ function routes(app){
         }        
     });
 
+    app.get('/actividadesRecientes/:id_perro', auth, async (req, res) =>{
+        try{
+            const id_perro = req.params.id_perro;
+            const actividadPerroReciente = await sql`
+            SELECT ar.*, a.*
+            FROM actividades_recientes ar
+            JOIN actividades a ON ar.id_actividad = a.id_actividad
+            WHERE ar.id_perro = ${id_perro}
+            ORDER BY ar.fecha_reciente DESC;
+            `
+            res.json(actividadPerroReciente);
+            }
+            catch(error){
+                console.log("Error al obtener actividad reciente por id");
+                res.status(500).send();
+            }        
+        
+    });
+
     //POST
     
     app.post('/signup', async (req, res) => {
@@ -316,6 +337,25 @@ function routes(app){
         catch(error){
             console.error('Error al guardar actividad:', error);
             res.status(500).json({ mensaje: 'Error al guardar actividad' });
+        }
+      });
+
+      app.post('/guardarActividadReciente/:id_perro/:id_actividad', auth, async (req, res)=>{
+        const idPerro = req.params.id_perro;
+        const idActividad = req.params.id_actividad;
+        const fecha_reciente = new Date(req.body.fecha_reciente).toUTCString();
+
+        try {
+            const registroActividad = await sql`
+            insert into actividades_recientes (id_perro, id_actividad, fecha_reciente)
+            values (${idPerro},${idActividad},${fecha_reciente});
+            `
+
+            res.status(201).json({mensaje: 'La actividad reciente se ha registrado correctamente'})
+        }
+        catch(error){
+            console.error('Error al guardar actividad reciente:', error);
+            res.status(500).json({ mensaje: 'Error al guardar actividad reciente' });
         }
       });
 
@@ -443,6 +483,21 @@ function routes(app){
           console.error('Error al eliminar la actividad del perro:', error);
           res.status(500).json({ mensaje: 'Error al eliminar la actividad del perro' });
         }
-      });      
+      });
+
+      //CRON PARA ELIMINACION DE ACTIVIDADES RECIENTES a las 00 hrs
+      cron.schedule('0 0 * * *', async () => {
+        try {
+          const limiteTiempo = new Date();
+          limiteTiempo.setDate(limiteTiempo.getDate() - 1); // Restar 1 día
+      
+          const actualizarActividades = await sql`
+          DELETE FROM actividades_recientes WHERE fecha_reciente < ${limiteTiempo}
+          `
+          console.log('Actividades recientes antiguas eliminadas con éxito');
+        } catch (error) {
+          console.error('Error al eliminar actividades recientes antiguas:', error);
+        }
+      });
 }
 export default routes
