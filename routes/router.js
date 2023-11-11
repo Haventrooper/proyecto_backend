@@ -359,6 +359,56 @@ function routes(app){
         }
       });
 
+      //POST DE ENTRENAMIENTO :C
+    app.post('/registroEntrenamiento', auth, async (req, res) => {
+        const id_usuario = req.id_usuario
+
+        const { id_perro, actividadesSeleccionadas } = req.body;
+
+        try {
+            const consulta = await sql`
+                DO $$ 
+                DECLARE
+                    v_id_entrenamiento INTEGER;
+                    id_actividad INTEGER;
+                BEGIN
+                    -- Obtener el próximo valor de la secuencia de entrenamientos
+                    SELECT nextval('entrenamientos_id_entrenamiento_seq') INTO v_id_entrenamiento;
+
+                    -- Insertar en la tabla de entrenamientos con el ID específico
+                    INSERT INTO entrenamientos (id_entrenamiento, nombre, descripcion, id_usuario) 
+                    VALUES (v_id_entrenamiento, 'Nombre del entrenamiento', 'Descripción del entrenamiento', ${id_usuario});
+
+                    -- Obtener el valor real del id_entrenamiento insertado
+                    SELECT currval('entrenamientos_id_entrenamiento_seq') INTO v_id_entrenamiento;
+
+                    -- Insertar en la tabla de actividades_entrenamientos
+                    FOREACH id_actividad IN ARRAY ${actividadesSeleccionadas}
+                    LOOP
+                        INSERT INTO actividades_entrenamientos (id_entrenamiento, id_actividad) 
+                        VALUES (v_id_entrenamiento, id_actividad);
+                    END LOOP;
+
+                    -- Insertar en la tabla de entrenamientos_perros
+                    INSERT INTO entrenamientos_perros (id_entrenamiento, id_perro) VALUES (v_id_entrenamiento, ${id_perro});
+
+                    -- Si deseas eliminar el entrenamiento creado
+                    -- DELETE FROM entrenamientos WHERE id_entrenamiento = v_id_entrenamiento;
+
+                    COMMIT;
+                END $$;
+            `;
+
+            // Ejecutar la consulta compuesta
+            await consulta;
+
+            res.status(201).json({ mensaje: 'Entrenamiento creado correctamente' });
+        } catch (error) {
+            console.error('Error al crear el entrenamiento:', error);
+            res.status(500).json({ mensaje: 'Error al crear el entrenamiento' });
+        }
+    });
+
       //PUT
 
       app.put('/actualizarActividad/:id_perro/:id_actividad', auth, async (req, res) => {        
