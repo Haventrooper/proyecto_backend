@@ -291,7 +291,7 @@ function routes(app){
     
             let result = await sql`
             INSERT INTO usuarios (id_tema, nombre, apellido, email, contrasena, fecha_creacion, fecha_nacimiento, sin_perro)
-            VALUES (${id_tema}, ${nombre}, ${apellido}, ${email}, ${contrasena}, ${fecha_creacion}, ${fecha_nacimiento}, ${sin_perro})
+            VALUES (1, ${nombre}, ${apellido}, ${email}, ${contrasena}, now(), ${fecha_nacimiento}, false)
             `;
             
             res.status(201).json({ mensaje: 'Usuario registrado con éxito' });
