@@ -230,6 +230,18 @@ function routes(app){
         }
     });
 
+    app.get('/razas', auth, async (req, res)=> {
+        try {
+            const razas = await sql`
+            select * from razas
+            `;
+            res.json(razas)
+        }catch(error){
+            console.log("Error al obtener razas")
+            res.status(500),send()
+        }
+    });
+
     app.get('/sugerencias/:id_raza', auth, async (req, res) =>{
         try{
             const id_raza = req.params.id_raza;
