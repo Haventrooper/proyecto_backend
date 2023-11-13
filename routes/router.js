@@ -3,6 +3,7 @@
 import postgres from 'postgres';
 import jwt from 'jsonwebtoken';
 import auth from '../middleware/autenticacion.js';
+import authAdmin from '../middleware/authAdmin.js';
 import cron from "node-cron"
 
 
@@ -549,5 +550,21 @@ function routes(app){
           console.error('Error al eliminar actividades recientes antiguas:', error);
         }
       });
+
+
+    //OPCIONES DE ADMINISTRADOR
+      app.get('/admin', async (req, res) => {
+        let response = await sql`
+        select * from administradores 
+        where email = ${req.query.email} and contrasena = ${req.query.contrasena}
+        `
+        if (response.length == 0){
+            res.send(false)
+        }else{
+            let token = jwt.sign({"administrador": response[0].id_administrador},'adminanything')
+            res.json({token})
+        }
+    });
+    
 }
 export default routes
