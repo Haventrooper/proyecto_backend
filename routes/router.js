@@ -565,6 +565,49 @@ function routes(app){
             res.json({token})
         }
     });
+
+    app.post('/actividadesAdmin', authAdmin, async (req, res) =>{
+        let { id_categoria, nombre, descripcion } = req.body;
+
+        try{
+            const consulta = await sql`
+            insert into actividades (id_categoria, nombre, descripcion, fecha_creacion, calificacion, progreso, contador)
+            values (${id_categoria}, ${nombre} , ${descripcion}, now(), 5, 0, 0)
+            `
+            res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
+            
+        }catch(error){
+            console.error("Ha habido un problema con el registro");
+        }
+
+    })
+
+    app.get('/adminUsuarios', authAdmin, async (req, res) =>{
+        try{
+            let response = await sql`
+            select * from usuarios
+            `
+            res.json(response)
+        }
+        catch(error){
+            console.error("No se encontraron los usuarios");
+            res.status(500).send()
+
+        }
+        
+    });
+    app.get('/adminCategorias', authAdmin, async (req, res) => {
+        try {
+            let categorias = await sql`
+            select * from categorias
+            `
+            res.json(categorias)
+        }
+        catch(error){
+            console.log(error)
+            res.status(500).send()
+        }
+    })
     
 }
 export default routes
