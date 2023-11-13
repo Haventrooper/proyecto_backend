@@ -19,7 +19,7 @@ function routes(app){
     app.get('/login', async (req, res) => {
         let response = await sql`
         select * from usuarios 
-        where nombre = ${req.query.nombre} and contrasena = ${req.query.contrasena}
+        where email = ${req.query.email} and contrasena = ${req.query.contrasena}
         `
         if (response.length == 0){
             res.send(false)
