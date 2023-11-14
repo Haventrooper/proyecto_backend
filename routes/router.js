@@ -658,7 +658,7 @@ function routes(app){
               DELETE FROM pasos
               WHERE id_actividad = ${idActividad}
             `;
-            
+
             const eliminacionActividad = await sql`
               DELETE FROM actividades
               WHERE id_actividad = ${idActividad}
@@ -676,6 +676,30 @@ function routes(app){
             res.status(500).json({ mensaje: 'Error al eliminar la actividad y sus pasos' });
           }
       });
+
+      // Eliminar un paso por su ID
+app.delete('/eliminarPaso/:id_paso', authAdmin, async (req, res) => {
+    const idPaso = req.params.id_paso;
+  
+    try {
+      // Elimina el paso por ID
+      const eliminacionPaso = await sql`
+        DELETE FROM pasos
+        WHERE id_paso = ${idPaso}
+      `;
+  
+      // Verifica si se eliminó correctamente el paso
+      if (eliminacionPaso) {
+        res.status(200).json({ mensaje: 'El paso ha sido eliminado correctamente' });
+      } else {
+        res.status(404).json({ mensaje: 'No se encontró el paso para eliminar' });
+      }
+    } catch (error) {
+      console.error('Error al eliminar el paso:', error);
+      res.status(500).json({ mensaje: 'Error al eliminar el paso' });
+    }
+  });
+  
       
 }
 export default routes
