@@ -608,6 +608,74 @@ function routes(app){
             res.status(500).send()
         }
     })
+    app.get('/actividadesAdmin', authAdmin, async (req, res) => {
+        try {
+            let actividades = await sql `
+            select * from actividades
+            `
+
+            res.json(actividades)
+        }
+        catch(e) {
+            console.log(e);
+            res.status(500).send()
+        }
+    });
+
+    app.post('/pasoActividad', authAdmin, async (req, res) => {
+        let { id_actividad, titulo, nombre, descripcion } = req.body;
+        try{
+            const consulta = await sql`
+            insert into pasos(id_actividad, titulo, nombre, descripcion)
+            values (${id_actividad}, ${titulo}, ${nombre} , ${descripcion})
+            `
+            res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
+            
+        }catch(error){
+            console.error("Ha habido un problema con el registro");
+        }
+    });
     
+    app.get('/pasosActividad/:id_actividad', authAdmin, async (req, res) => {
+        try{
+            const id_actividad = req.params.id_actividad
+            const pasos = await sql`
+            select * from pasos
+            where id_actividad = ${id_actividad}
+            `
+            res.json(pasos)
+            
+        }catch(error){
+            console.error("Ha habido un problema con la consulta");
+        }
+    });
+    
+    app.delete('/eliminarActividadYPasos/:id_actividad', authAdmin, async (req, res) => {
+        const idActividad = req.params.id_actividad;
+      
+        try {
+            const eliminacionPasos = await sql`
+              DELETE FROM pasos
+              WHERE id_actividad = ${idActividad}
+            `;
+            
+            const eliminacionActividad = await sql`
+              DELETE FROM actividades
+              WHERE id_actividad = ${idActividad}
+            `;
+          
+            
+          
+            if (eliminacionActividad && eliminacionPasos) {
+              res.status(200).json({ mensaje: 'La actividad y sus pasos han sido eliminados correctamente' });
+            } else {
+              res.status(404).json({ mensaje: 'No se encontró la actividad para eliminar' });
+            }
+          } catch (error) {
+            console.error('Error al eliminar la actividad y sus pasos:', error);
+            res.status(500).json({ mensaje: 'Error al eliminar la actividad y sus pasos' });
+          }
+      });
+      
 }
 export default routes
