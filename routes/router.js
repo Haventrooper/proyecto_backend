@@ -566,21 +566,6 @@ function routes(app){
         }
     });
 
-    app.post('/actividadesAdmin', authAdmin, async (req, res) =>{
-        let { id_categoria, nombre, descripcion } = req.body;
-
-        try{
-            const consulta = await sql`
-            insert into actividades (id_categoria, nombre, descripcion, fecha_creacion, calificacion, progreso, contador)
-            values (${id_categoria}, ${nombre} , ${descripcion}, now(), 5, 0, 0)
-            `
-            res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
-            
-        }catch(error){
-            console.error("Ha habido un problema con el registro");
-        }
-
-    })
 
     app.get('/adminUsuarios', authAdmin, async (req, res) =>{
         try{
@@ -592,10 +577,9 @@ function routes(app){
         catch(error){
             console.error("No se encontraron los usuarios");
             res.status(500).send()
-
         }
-        
     });
+
     app.get('/adminCategorias', authAdmin, async (req, res) => {
         try {
             let categorias = await sql`
@@ -608,6 +592,7 @@ function routes(app){
             res.status(500).send()
         }
     })
+
     app.get('/actividadesAdmin', authAdmin, async (req, res) => {
         try {
             let actividades = await sql `
@@ -619,6 +604,74 @@ function routes(app){
         catch(e) {
             console.log(e);
             res.status(500).send()
+        }
+    });
+
+    app.get('/pasosActividad/:id_actividad', authAdmin, async (req, res) => {
+        try{
+            const id_actividad = req.params.id_actividad
+            const pasos = await sql`
+            select * from pasos
+            where id_actividad = ${id_actividad}
+            `
+            res.json(pasos)
+            
+        }catch(error){
+            console.error("Ha habido un problema con la consulta");
+        }
+    });
+    
+    
+    app.get('/getSugerencias', authAdmin, async (req, res) => {
+        try{
+            const sugerencias = await sql`
+            select * from sugerencias
+            `
+            res.json(sugerencias)
+            
+        }catch(error){
+            console.error("Ha habido un problema con la consulta de sugerencias");
+        }
+    });
+
+    app.get('/getSugerencias/:id_sugerencia', authAdmin, async (req, res) => {
+        try{
+            const id_sugerencia = req.params.id_sugerencia
+            const sugerencias = await sql`
+            select * from sugerencias
+            where id_sugerencia = ${id_sugerencia}
+            `
+            res.json(sugerencias)
+            
+        }catch(error){
+            console.error("Ha habido un problema con la consulta de sugerencias");
+        }
+    });
+
+    app.get('/getRazas', authAdmin, async (req, res) =>{
+        try{
+            const razas = await sql`
+            select * from razas
+            `
+            res.json(razas)
+            
+        }catch(error){
+            console.error("Ha habido un problema con la consulta de razas");
+        }
+    });
+
+    app.get('/getRazas/:id_raza', authAdmin, async (req, res) =>{
+        try{
+            const id_raza = req.params.id_raza
+
+            const razas = await sql`
+            select * from razas
+            where id_raza = ${id_raza}
+            `
+            res.json(razas)
+            
+        }catch(error){
+            console.error("Ha habido un problema con la consulta de razas");
         }
     });
 
@@ -636,20 +689,49 @@ function routes(app){
         }
     });
     
-    app.get('/pasosActividad/:id_actividad', authAdmin, async (req, res) => {
+    app.post('/actividadesAdmin', authAdmin, async (req, res) =>{
+        let { id_categoria, nombre, descripcion } = req.body;
+
         try{
-            const id_actividad = req.params.id_actividad
-            const pasos = await sql`
-            select * from pasos
-            where id_actividad = ${id_actividad}
+            const consulta = await sql`
+            insert into actividades (id_categoria, nombre, descripcion, fecha_creacion, calificacion, progreso, contador)
+            values (${id_categoria}, ${nombre} , ${descripcion}, now(), 5, 0, 0)
             `
-            res.json(pasos)
+            res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
             
         }catch(error){
-            console.error("Ha habido un problema con la consulta");
+            console.error("Ha habido un problema con el registro");
+        }
+    })
+
+    app.post('/postRaza', authAdmin, async (req, res) =>{
+        let { nombre } = req.body;
+        try{
+            const consulta = await sql`
+            insert into razas(nombre)
+            values (${nombre})
+            `
+            res.status(201).json({mensaje: 'La raza se ha registrado correctamente'})
+            
+        }catch(error){
+            console.error("Ha habido un problema con el registro de raza");
         }
     });
-    
+
+    app.post('/postSugerencia', authAdmin, async (req, res) =>{
+        let { id_raza, nombre, descripcion } = req.body;
+        try{
+            const consulta = await sql`
+            insert into sugerencias(id_raza, nombre, descripcion)
+            values (${id_raza}, ${nombre} , ${descripcion});
+            `
+            res.status(201).json({mensaje: 'La sugerencia se ha registrado correctamente'})
+            
+        }catch(error){
+            console.error("Ha habido un problema con el registro de sugerencia");
+        }
+    });
+
     app.delete('/eliminarActividadYPasos/:id_actividad', authAdmin, async (req, res) => {
         const idActividad = req.params.id_actividad;
       
@@ -663,9 +745,7 @@ function routes(app){
               DELETE FROM actividades
               WHERE id_actividad = ${idActividad}
             `;
-          
-            
-          
+
             if (eliminacionActividad && eliminacionPasos) {
               res.status(200).json({ mensaje: 'La actividad y sus pasos han sido eliminados correctamente' });
             } else {
@@ -677,7 +757,7 @@ function routes(app){
           }
       });
 
-      // Eliminar un paso por su ID
+    // Eliminar un paso por su ID
     app.delete('/eliminarPaso/:id_paso', authAdmin, async (req, res) => {
         const idPaso = req.params.id_paso;
     
@@ -695,8 +775,8 @@ function routes(app){
             res.status(404).json({ mensaje: 'No se encontró el paso para eliminar' });
         }
         } catch (error) {
-        console.error('Error al eliminar el paso:', error);
-        res.status(500).json({ mensaje: 'Error al eliminar el paso' });
+            console.error('Error al eliminar el paso:', error);
+            res.status(500).json({ mensaje: 'Error al eliminar el paso' });
         }
     });    
 }
