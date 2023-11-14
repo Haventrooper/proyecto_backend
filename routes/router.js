@@ -580,7 +580,7 @@ function routes(app){
         }
     });
 
-    app.get('/adminCategorias', authAdmin, async (req, res) => {
+    app.get('/getCategorias', authAdmin, async (req, res) => {
         try {
             let categorias = await sql`
             select * from categorias
@@ -674,6 +674,20 @@ function routes(app){
             console.error("Ha habido un problema con la consulta de razas");
         }
     });
+
+    app.post('/postCategoria', authAdmin, async (req, res) =>{
+        let { nombre, descripcion } = req.body;
+        try{
+            const consulta = await sql`
+            insert into categorias(nombre, descripcion)
+            values (${nombre} , ${descripcion})
+            `
+            res.status(201).json({mensaje: 'La categoría se ha registrado correctamente'})
+            
+        }catch(error){
+            console.error("Ha habido un problema con el registro de categoria");
+        }
+    })
 
     app.post('/pasoActividad', authAdmin, async (req, res) => {
         let { id_actividad, titulo, nombre, descripcion } = req.body;
@@ -778,6 +792,71 @@ function routes(app){
             console.error('Error al eliminar el paso:', error);
             res.status(500).json({ mensaje: 'Error al eliminar el paso' });
         }
+    });
+    
+    app.delete('/eliminarSugerencia/:id_sugerencia', authAdmin, async (req, res) => {
+        const id_sugerencia = req.params.id_sugerencia;
+    
+        try {
+        // Elimina el paso por ID
+        const eliminacionSugerencia = await sql`
+            DELETE FROM sugerencias
+            WHERE id_sugerencia = ${id_sugerencia}
+        `;
+    
+        // Verifica si se eliminó correctamente el paso
+        if (eliminacionSugerencia) {
+            res.status(200).json({ mensaje: 'La sugerencia ha sido eliminada correctamente' });
+        } else {
+            res.status(404).json({ mensaje: 'No se encontró la sugerencia para eliminar' });
+        }
+        } catch (error) {
+            console.error('Error al eliminar la sugerencia:', error);
+            res.status(500).json({ mensaje: 'Error al eliminar la sugerencia' });
+        }
     });    
+
+    app.delete('/eliminarRaza/:id_raza', authAdmin, async (req, res) => {
+        const id_raza = req.params.id_raza;
+    
+        try {
+        // Elimina el paso por ID
+        const eliminacionRaza = await sql`
+            DELETE FROM razas
+            WHERE id_raza = ${id_raza}
+        `;
+    
+        // Verifica si se eliminó correctamente el raza
+        if (eliminacionRaza) {
+            res.status(200).json({ mensaje: 'La raza ha sido eliminada correctamente' });
+        } else {
+            res.status(404).json({ mensaje: 'No se encontró la raza para eliminar' });
+        }
+        } catch (error) {
+            console.error('Error al eliminar la raza:', error);
+            res.status(500).json({ mensaje: 'Error al eliminar la raza' });
+        }
+    });    
+
+    app.delete('/deleteCategoria/:id_categoria', authAdmin, async (req, res) => {
+        const id_categoria = req.params.id_categoria;
+    
+        try {
+        // Elimina el paso por ID
+        const consulta = await sql`
+            DELETE FROM categorias
+            WHERE id_categoria = ${id_categoria}
+        `;
+    
+        if (consulta) {
+            res.status(200).json({ mensaje: 'La categoria ha sido eliminada correctamente' });
+        } else {
+            res.status(404).json({ mensaje: 'No se encontró la categoria para eliminar' });
+        }
+        } catch (error) {
+            console.error('Error al eliminar la categoria:', error);
+            res.status(500).json({ mensaje: 'Error al eliminar la categoria' });
+        }
+    });
 }
 export default routes
