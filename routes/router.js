@@ -479,11 +479,8 @@ function routes(app){
             WHERE id_usuario = ${req.id_usuario}
           `;
           
-          if (result && result.rowCount > 0) {
-            res.status(200).json({ mensaje: 'Usuario eliminado con éxito' });
-          } else {
-            res.status(404).json({ mensaje: 'No se encontró el usuario para eliminar' });
-          }
+          res.status(200).json({ mensaje: 'Usuario eliminado con éxito' });
+
         } catch (error) {
           console.error('Error al eliminar el usuario:', error);
           res.status(500).json({ mensaje: 'Error al eliminar el usuario' });
@@ -508,12 +505,8 @@ function routes(app){
             DELETE FROM perros
             WHERE id_perro = ${id_perro}
           `;
+          res.status(200).json({ mensaje: 'Perro eliminado con éxito' });
           
-          if (eliminacionPerro && eliminacionPerro.rowCount > 0) {
-            res.status(200).json({ mensaje: 'El perro ha sido eliminado correctamente' });
-          } else {
-            res.status(404).json({ mensaje: 'No se encontró el perro para eliminar' });
-          }
         } catch (error) {
           console.error('Error al eliminar el perro:', error);
           res.status(500).json({ mensaje: 'Error al eliminar el perro' });
@@ -530,11 +523,8 @@ function routes(app){
             WHERE id_perro = ${idPerro} AND id_actividad = ${idActividad}
           `;
       
-          if (eliminacionActividad && eliminacionActividad.rowCount > 0) {
-            res.status(200).json({ mensaje: 'La actividad del perro ha sido eliminada correctamente' });
-          } else {
-            res.status(404).json({ mensaje: 'No se encontró la actividad del perro para eliminar' });
-          }
+          res.status(200).json({ mensaje: 'Actividad de perro eliminada con éxito' });
+
         } catch (error) {
           console.error('Error al eliminar la actividad del perro:', error);
           res.status(500).json({ mensaje: 'Error al eliminar la actividad del perro' });
@@ -759,17 +749,23 @@ function routes(app){
               DELETE FROM pasos
               WHERE id_actividad = ${idActividad}
             `;
+            const eliminacionActividades_perros = await sql`
+            DELETE FROM actividades_perros
+            WHERE id_actividad = ${idActividad}
+            `;
+            
+            const eliminarActividadesRecientes = await sql`
+            DELETE FROM actividades_recientes
+            WHERE id_actividad = ${idActividad}
+            `;
 
             const eliminacionActividad = await sql`
               DELETE FROM actividades
               WHERE id_actividad = ${idActividad}
             `;
 
-            if (eliminacionActividad && eliminacionPasos) {
-              res.status(200).json({ mensaje: 'La actividad y sus pasos han sido eliminados correctamente' });
-            } else {
-              res.status(404).json({ mensaje: 'No se encontró la actividad para eliminar' });
-            }
+            res.status(200).json({ mensaje: 'Actividad y pasos eliminados con éxito' });
+
           } catch (error) {
             console.error('Error al eliminar la actividad y sus pasos:', error);
             res.status(500).json({ mensaje: 'Error al eliminar la actividad y sus pasos' });
@@ -788,11 +784,8 @@ function routes(app){
         `;
     
         // Verifica si se eliminó correctamente el paso
-        if (eliminacionPaso) {
-            res.status(200).json({ mensaje: 'El paso ha sido eliminado correctamente' });
-        } else {
-            res.status(404).json({ mensaje: 'No se encontró el paso para eliminar' });
-        }
+        res.status(200).json({ mensaje: 'Paso eliminado con éxito' });
+
         } catch (error) {
             console.error('Error al eliminar el paso:', error);
             res.status(500).json({ mensaje: 'Error al eliminar el paso' });
@@ -810,11 +803,8 @@ function routes(app){
         `;
     
         // Verifica si se eliminó correctamente el paso
-        if (eliminacionSugerencia) {
-            res.status(200).json({ mensaje: 'La sugerencia ha sido eliminada correctamente' });
-        } else {
-            res.status(404).json({ mensaje: 'No se encontró la sugerencia para eliminar' });
-        }
+        res.status(200).json({ mensaje: 'Sugerencia eliminada con éxito' });
+
         } catch (error) {
             console.error('Error al eliminar la sugerencia:', error);
             res.status(500).json({ mensaje: 'Error al eliminar la sugerencia' });
@@ -833,11 +823,8 @@ function routes(app){
         `;
     
         // Verifica si se eliminó correctamente el raza
-        if (eliminacionRaza) {
-            res.status(200).json({ mensaje: 'La raza ha sido eliminada correctamente' });
-        } else {
-            res.status(404).json({ mensaje: 'No se encontró la raza para eliminar' });
-        }
+        res.status(200).json({ mensaje: 'Raza eliminada con éxito' });
+
         } catch (error) {
             console.error('Error al eliminar la raza:', error);
             res.status(500).json({ mensaje: 'Error al eliminar la raza' });
@@ -854,11 +841,8 @@ function routes(app){
             WHERE id_categoria = ${id_categoria}
         `;
     
-        if (consulta) {
-            res.status(200).json({ mensaje: 'La categoria ha sido eliminada correctamente' });
-        } else {
-            res.status(404).json({ mensaje: 'No se encontró la categoria para eliminar' });
-        }
+        res.status(200).json({ mensaje: 'Categoria eliminada con éxito' });
+
         } catch (error) {
             console.error('Error al eliminar la categoria:', error);
             res.status(500).json({ mensaje: 'Error al eliminar la categoria' });
