@@ -497,6 +497,11 @@ function routes(app){
             DELETE FROM actividades_perros
             WHERE id_perro = ${id_perro}
           `;
+
+          await sql`
+            DELETE FROM actividades_recientes
+            WHERE id_perro = ${id_perro}
+          `;
       
           // Luego, elimina el perro en la tabla perros
           const eliminacionPerro = await sql`
