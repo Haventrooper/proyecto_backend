@@ -825,6 +825,7 @@ function routes(app){
         const id_raza = req.params.id_raza;
     
         try {
+            
         // Elimina el paso por ID
         const eliminacionRaza = await sql`
             DELETE FROM razas
