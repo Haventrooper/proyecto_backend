@@ -6,6 +6,7 @@ function auth(req, res, next) {
         let id_usuario = jwt.verify(token, 'cualquiercosa')
         req.id_usuario = id_usuario.usuario
         console.log(req.id_usuario)
+        
         next()
     }
     catch(e){
