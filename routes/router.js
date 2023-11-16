@@ -502,7 +502,6 @@ function routes(app){
         }
       });
       
-      
       app.delete('/eliminarPerro/:id_perro', auth, async (req, res) => {
         const id_perro = req.params.id_perro;
         try {
