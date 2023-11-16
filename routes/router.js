@@ -360,12 +360,17 @@ function routes(app){
 
         try {
             const registroActividad = await sql`
-            insert into actividades_recientes (id_perro, id_actividad, fecha_reciente)
-            values (${idPerro},${idActividad},${fecha_reciente});
+            INSERT INTO actividades_recientes (id_perro, id_actividad, fecha_reciente)
+            VALUES (${idPerro}, ${idActividad}, ${fecha_reciente})
+            ON CONFLICT (id_perro, id_actividad) DO UPDATE SET fecha_reciente = ${fecha_reciente};
             `
 
-            res.status(201).json({mensaje: 'La actividad reciente se ha registrado correctamente'})
-        }
+            if (registroActividad.affectedRows > 0) {
+                res.status(201).json({ mensaje: 'La actividad reciente se ha registrado correctamente' });
+            } else {
+                // No se insertó una nueva fila, indica que ya existe
+                res.status(200).json({ mensaje: 'La actividad reciente ya está registrada' });
+            }        }
         catch(error){
             console.error('Error al guardar actividad reciente:', error);
             res.status(500).json({ mensaje: 'Error al guardar actividad reciente' });
