@@ -476,21 +476,32 @@ function routes(app){
 
       //DELETE
 
-      app.delete('/eliminarUsuario', auth, async (req, res) => {
+      app.delete('/eliminarUsuario/:id_usuario', auth, async (req, res) => {
         try {
-          // Aquí realizamos la eliminación del usuario en la base de datos.
-          let result = await sql`
-            DELETE FROM usuarios
-            WHERE id_usuario = ${req.id_usuario}
-          `;
-          
-          res.status(200).json({ mensaje: 'Usuario eliminado con éxito' });
-
+          const id_usuario = req.params.id_usuario;
+      
+          // Obtén la lista de perros asociados al usuario
+          const perros = await sql`SELECT id_perro FROM perros WHERE id_usuario = ${id_usuario}`;
+      
+          // Itera sobre la lista de perros y elimina registros en otras tablas
+          for (const perro of perros) {
+            await sql`DELETE FROM actividades_perros WHERE id_perro = ${perro.id_perro}`;
+            await sql`DELETE FROM actividades_recientes WHERE id_perro = ${perro.id_perro}`;
+          }
+      
+          // Elimina todos los perros asociados al usuario
+          await sql`DELETE FROM perros WHERE id_usuario = ${id_usuario}`;
+      
+          // Finalmente, elimina el usuario
+          await sql`DELETE FROM usuarios WHERE id_usuario = ${id_usuario}`;
+      
+          res.status(200).json({ mensaje: 'Usuario y sus perros relacionados eliminados con éxito' });
         } catch (error) {
-          console.error('Error al eliminar el usuario:', error);
-          res.status(500).json({ mensaje: 'Error al eliminar el usuario' });
+          console.error('Error al eliminar el usuario y sus perros relacionados:', error);
+          res.status(500).json({ mensaje: 'Error al eliminar el usuario y sus perros relacionados' });
         }
       });
+      
       
       app.delete('/eliminarPerro/:id_perro', auth, async (req, res) => {
         const id_perro = req.params.id_perro;
