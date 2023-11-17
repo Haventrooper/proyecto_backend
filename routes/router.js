@@ -25,7 +25,6 @@ function routes(app){
             where email = ${req.query.email}
             `
             bcrypt.compare(req.query.contrasena, response[0].contrasena, function(err, result) {
-                console.log(result)
                 if (!result){
                     res.send(false)
                 }else{
@@ -391,7 +390,6 @@ function routes(app){
         const idPerro = req.params.id_perro;
         const idActividad = req.params.id_actividad;
         const nuevoContador = req.body.contador;
-        console.log(req.body)
     
         try {
             const actualizacionActividad = await sql`
@@ -692,7 +690,6 @@ function routes(app){
             insert into actividades (id_categoria, nombre, descripcion, fecha_creacion, calificacion, progreso, contador, imagen)
             values (${id_categoria}, ${nombre} , ${descripcion}, now(), 5, 0, 0, ${imagen} )
             `
-            console.log(imagen)
             res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
             
         }catch(error){
