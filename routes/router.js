@@ -403,44 +403,6 @@ function routes(app){
         }
       });
 
-      //POST DE ENTRENAMIENTO -->pendiente
-      app.post('/registroEntrenamiento', auth, async (req, res) => {
-
-        const id_usuario = req.id_usuario;
-        const { nombre, descripcion, actividadesSeleccionadas } = req.body;
-    
-        try {
-            const consulta = await sql`
-                insert into entrenamientos (id_usuario, nombre, descripcion)
-                values (${id_usuario}, ${nombre}, ${descripcion})
-            `
-            
-            let id_consulta = await sql`
-            select max(id_entrenamiento) from entrenamientos
-            `
-
-            console.log(id_consulta[0].max)
-            id_consulta = id_consulta[0].max
-
-            for(let i = 0; i < actividadesSeleccionadas.length; i++){
-                await sql`
-                    insert into actividades_entrenamientos (id_entrenamiento, id_actividad)
-                    values (${id_consulta}, ${actividadesSeleccionadas[i]})
-                `
-            }
-
-
-            
-            res.status(201).json({ mensaje: 'Entrenamiento creado correctamente' });
-        } catch (error) {
-            console.error('Error al crear el entrenamiento:', error);
-            res.status(500).json({ mensaje: 'Error al crear el entrenamiento' });
-        }
-    });
-    
-    app.post('/registroEntrenamiento', auth, async (req, res) => {
-    
-    });
       //PUT
 
       app.put('/actualizarActividad/:id_perro/:id_actividad', auth, async (req, res) => {        
