@@ -37,19 +37,7 @@ function routes(app){
         catch(error){
             console.log(error);
             res.status(403).json({ message: 'Error en el no encontrado' });
-            
-        }
-        
-
-        // /*
-        // if (response.length == 0){
-        //     res.send(false)
-        // }else{
-        //     let token = jwt.sign({"usuario": response[0].id_usuario},'cualquiercosa')
-        //     res.json({token})
-        // }
-        // */
-        
+        }        
     });
 
     app.get('/nombreUsuario', auth, async (req, res)=>{
@@ -127,12 +115,8 @@ function routes(app){
         `;
 
         if (actividadConsulta && actividadConsulta.length > 0) {
-            // Si actividadConsulta tiene al menos una fila, significa que la actividad ya está guardada
-            // Puedes hacer lo que necesites hacer en este caso
             res.status(200).json({mensaje: 'Actividad ya en BD'})
           } else {
-            // No se encontraron coincidencias, lo que indica que la actividad aún no se ha guardado
-            // Puedes hacer lo que necesites hacer en este caso
             res.status(404).json({ mensaje: 'No hay actividad guardada en BD' });
         }
         } catch (error) {
@@ -150,7 +134,7 @@ function routes(app){
             where usuarios.id_usuario = ${req.id_usuario}
             `
 
-            res.json(usuario[0]) //array completo
+            res.json(usuario[0])
         }
         catch(e){
             console.log(e)
@@ -166,7 +150,7 @@ function routes(app){
             WHERE perros.id_usuario =${req.id_usuario}
             `
 
-            res.json(perros) //array completo
+            res.json(perros)
         }
         catch(e){
             console.log(e)
@@ -204,7 +188,7 @@ function routes(app){
             on usuarios.id_tema = temas.id_tema
             where usuarios.id_usuario = ${req.id_usuario}
         `
-            res.json(tema[0]) //primer tema
+            res.json(tema[0])
 
         }
         catch(e){
@@ -314,7 +298,6 @@ function routes(app){
                 console.log("Error al obtener actividad reciente por id");
                 res.status(500).send();
             }        
-        
     });
 
     //POST
@@ -325,8 +308,7 @@ function routes(app){
         
         try {
 
-            // Generar el hash de la contraseña antes de almacenarla
-            const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 es el costo del hashing
+            const hashedPassword = await bcrypt.hash(contrasena, 10);
     
             let result = await sql`
             INSERT INTO usuarios (id_tema, nombre, apellido, email, contrasena, fecha_creacion, fecha_nacimiento, sin_perro)
@@ -394,9 +376,9 @@ function routes(app){
             if (registroActividad.affectedRows > 0) {
                 res.status(201).json({ mensaje: 'La actividad reciente se ha registrado correctamente' });
             } else {
-                // No se insertó una nueva fila, indica que ya existe
                 res.status(200).json({ mensaje: 'La actividad reciente ya está registrada' });
-            }        }
+            }        
+        }
         catch(error){
             console.error('Error al guardar actividad reciente:', error);
             res.status(500).json({ mensaje: 'Error al guardar actividad reciente' });
@@ -467,20 +449,15 @@ function routes(app){
       app.delete('/eliminarUsuario/:id_usuario', auth, async (req, res) => {
         try {
           const id_usuario = req.params.id_usuario;
-      
-          // Obtén la lista de perros asociados al usuario
           const perros = await sql`SELECT id_perro FROM perros WHERE id_usuario = ${id_usuario}`;
       
-          // Itera sobre la lista de perros y elimina registros en otras tablas
           for (const perro of perros) {
             await sql`DELETE FROM actividades_perros WHERE id_perro = ${perro.id_perro}`;
             await sql`DELETE FROM actividades_recientes WHERE id_perro = ${perro.id_perro}`;
           }
       
-          // Elimina todos los perros asociados al usuario
           await sql`DELETE FROM perros WHERE id_usuario = ${id_usuario}`;
       
-          // Finalmente, elimina el usuario
           await sql`DELETE FROM usuarios WHERE id_usuario = ${id_usuario}`;
       
           res.status(200).json({ mensaje: 'Usuario y sus perros relacionados eliminados con éxito' });
@@ -503,7 +480,6 @@ function routes(app){
             WHERE id_perro = ${id_perro}
           `;
       
-          // Luego, elimina el perro en la tabla perros
           const eliminacionPerro = await sql`
             DELETE FROM perros
             WHERE id_perro = ${id_perro}
@@ -534,11 +510,10 @@ function routes(app){
         }
       });
 
-      //CRON PARA ELIMINACION DE ACTIVIDADES RECIENTES a las 00 hrs
       cron.schedule('0 0 * * *', async () => {
         try {
           const limiteTiempo = new Date();
-          limiteTiempo.setDate(limiteTiempo.getDate() - 1); // Restar 1 día
+          limiteTiempo.setDate(limiteTiempo.getDate() - 1); 
       
           const actualizarActividades = await sql`
           DELETE FROM actividades_recientes WHERE fecha_reciente < ${limiteTiempo}
@@ -550,7 +525,7 @@ function routes(app){
       });
 
 
-    //OPCIONES DE ADMINISTRADOR
+      //OPCIONES DE ADMINISTRADOR
       app.get('/admin', async (req, res) => {
         try{
 
@@ -574,7 +549,6 @@ function routes(app){
             res.status(403).json({ message: 'Error en el no encontrado' });
         }
     });
-
 
     app.get('/adminUsuarios', authAdmin, async (req, res) =>{
         try{
@@ -629,7 +603,6 @@ function routes(app){
             console.error("Ha habido un problema con la consulta");
         }
     });
-    
     
     app.get('/getSugerencias', authAdmin, async (req, res) => {
         try{
@@ -787,18 +760,15 @@ function routes(app){
           }
       });
 
-    // Eliminar un paso por su ID
     app.delete('/eliminarPaso/:id_paso', authAdmin, async (req, res) => {
         const idPaso = req.params.id_paso;
     
         try {
-        // Elimina el paso por ID
         const eliminacionPaso = await sql`
             DELETE FROM pasos
             WHERE id_paso = ${idPaso}
         `;
     
-        // Verifica si se eliminó correctamente el paso
         res.status(200).json({ mensaje: 'Paso eliminado con éxito' });
 
         } catch (error) {
@@ -811,13 +781,11 @@ function routes(app){
         const id_sugerencia = req.params.id_sugerencia;
     
         try {
-        // Elimina el paso por ID
         const eliminacionSugerencia = await sql`
             DELETE FROM sugerencias
             WHERE id_sugerencia = ${id_sugerencia}
         `;
     
-        // Verifica si se eliminó correctamente el paso
         res.status(200).json({ mensaje: 'Sugerencia eliminada con éxito' });
 
         } catch (error) {
@@ -831,13 +799,11 @@ function routes(app){
     
         try {
             
-        // Elimina el paso por ID
         const eliminacionRaza = await sql`
             DELETE FROM razas
             WHERE id_raza = ${id_raza}
         `;
     
-        // Verifica si se eliminó correctamente el raza
         res.status(200).json({ mensaje: 'Raza eliminada con éxito' });
 
         } catch (error) {
@@ -850,7 +816,6 @@ function routes(app){
         const id_categoria = req.params.id_categoria;
     
         try {
-        // Elimina el paso por ID
         const consulta = await sql`
             DELETE FROM categorias
             WHERE id_categoria = ${id_categoria}
