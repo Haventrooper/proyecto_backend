@@ -535,7 +535,6 @@ function routes(app){
         `
 
         bcrypt.compare(req.query.contrasena, response[0].contrasena, function(err, result) {
-            console.log(result)
             if (!result){
                 res.send(false)
             }else{
