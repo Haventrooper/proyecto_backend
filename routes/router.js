@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import auth from '../middleware/autenticacion.js';
 import authAdmin from '../middleware/authAdmin.js';
 import cron from "node-cron"
+import bcrypt from "bcrypt"
 
 
 const sql = postgres({
@@ -18,17 +19,38 @@ const sql = postgres({
 function routes(app){
 
     app.get('/login', async (req, res) => {
-        let response = await sql`
-        select * from usuarios 
-        where email = ${req.query.email} and contrasena = ${req.query.contrasena}
-        `
-        if (response.length == 0){
-            res.send(false)
-        }else{
-            let token = jwt.sign({"usuario": response[0].id_usuario},'cualquiercosa')
-            res.json({token}) //Se envia el token
+        try{
+            let response = await sql`
+            select * from usuarios 
+            where email = ${req.query.email}
+            `
+            bcrypt.compare(req.query.contrasena, response[0].contrasena, function(err, result) {
+                console.log(result)
+                if (!result){
+                    res.send(false)
+                }else{
+                    let token = jwt.sign({"usuario": response[0].id_usuario},'cualquiercosa')
+                    res.json({token})
+                }
+            });
         }
-    })
+        catch(error){
+            console.log(error);
+            res.status(403).json({ message: 'Error en el no encontrado' });
+            
+        }
+        
+
+        // /*
+        // if (response.length == 0){
+        //     res.send(false)
+        // }else{
+        //     let token = jwt.sign({"usuario": response[0].id_usuario},'cualquiercosa')
+        //     res.json({token})
+        // }
+        // */
+        
+    });
 
     app.get('/nombreUsuario', auth, async (req, res)=>{
         try{
@@ -43,7 +65,8 @@ function routes(app){
             console.log(e);
             res.status(500).json({ message: 'Error en el servidor' });
           }
-    })
+    });
+    
     app.get('/actividades', auth, async (req, res) => {
         try {
             let actividades = await sql `
@@ -301,10 +324,13 @@ function routes(app){
         let {id_tema, nombre, apellido, email, contrasena, fecha_creacion, fecha_nacimiento, sin_perro } = req.body;
         
         try {
+
+            // Generar el hash de la contraseña antes de almacenarla
+            const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 es el costo del hashing
     
             let result = await sql`
             INSERT INTO usuarios (id_tema, nombre, apellido, email, contrasena, fecha_creacion, fecha_nacimiento, sin_perro)
-            VALUES (1, ${nombre}, ${apellido}, ${email}, ${contrasena}, now(), ${fecha_nacimiento}, false)
+            VALUES (1, ${nombre}, ${apellido}, ${email}, ${hashedPassword}, now(), ${fecha_nacimiento}, false)
             `;
             
             res.status(201).json({ mensaje: 'Usuario registrado con éxito' });
@@ -564,15 +590,26 @@ function routes(app){
 
     //OPCIONES DE ADMINISTRADOR
       app.get('/admin', async (req, res) => {
+        try{
+
         let response = await sql`
         select * from administradores 
-        where email = ${req.query.email} and contrasena = ${req.query.contrasena}
+        where email = ${req.query.email}
         `
-        if (response.length == 0){
-            res.send(false)
-        }else{
-            let token = jwt.sign({"administrador": response[0].id_administrador},'adminanything')
-            res.json({token})
+
+        bcrypt.compare(req.query.contrasena, response[0].contrasena, function(err, result) {
+            console.log(result)
+            if (!result){
+                res.send(false)
+            }else{
+                let token = jwt.sign({"administrador": response[0].id_administrador},'adminanything')
+                res.json({token})
+            }
+        });
+        }
+            catch(error){
+            console.log(error);
+            res.status(403).json({ message: 'Error en el no encontrado' });
         }
     });
 
@@ -700,11 +737,11 @@ function routes(app){
     })
 
     app.post('/pasoActividad', authAdmin, async (req, res) => {
-        let { id_actividad, titulo, nombre, descripcion } = req.body;
+        let { id_actividad, titulo, nombre, descripcion, imagen } = req.body;
         try{
             const consulta = await sql`
-            insert into pasos(id_actividad, titulo, nombre, descripcion)
-            values (${id_actividad}, ${titulo}, ${nombre} , ${descripcion})
+            insert into pasos(id_actividad, titulo, nombre, descripcion, imagen)
+            values (${id_actividad}, ${titulo}, ${nombre} , ${descripcion}, ${imagen})
             `
             res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
             
@@ -714,13 +751,14 @@ function routes(app){
     });
     
     app.post('/actividadesAdmin', authAdmin, async (req, res) =>{
-        let { id_categoria, nombre, descripcion } = req.body;
+        let { id_categoria, nombre, descripcion, imagen } = req.body;
 
         try{
             const consulta = await sql`
-            insert into actividades (id_categoria, nombre, descripcion, fecha_creacion, calificacion, progreso, contador)
-            values (${id_categoria}, ${nombre} , ${descripcion}, now(), 5, 0, 0)
+            insert into actividades (id_categoria, nombre, descripcion, fecha_creacion, calificacion, progreso, contador, imagen)
+            values (${id_categoria}, ${nombre} , ${descripcion}, now(), 5, 0, 0, ${imagen} )
             `
+            console.log(imagen)
             res.status(201).json({mensaje: 'La actividad se ha registrado correctamente'})
             
         }catch(error){
