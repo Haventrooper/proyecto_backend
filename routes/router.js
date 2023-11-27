@@ -24,19 +24,25 @@ function routes(app){
             select * from usuarios 
             where email = ${req.query.email}
             `
+
+            if (response.length === 0) {
+                // Usuario no encontrado
+                return res.json({ success: false, message: 'Usuario no encontrado' });
+            }
+
             bcrypt.compare(req.query.contrasena, response[0].contrasena, function(err, result) {
                 if (!result){
-                    res.send(false)
+                    res.json({ success: false, message: 'Contraseña incorrecta' });
                 }else{
                     let token = jwt.sign({"usuario": response[0].id_usuario},'cualquiercosa')
-                    res.json({token})
+                    res.json({ success: true, token });
                 }
             });
-        }
-        catch(error){
-            console.log(error);
-            res.status(403).json({ message: 'Error en el no encontrado' });
-        }        
+        } 
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ success: false, message: 'Error en el servidor' });
+        }    
     });
 
     app.get('/nombreUsuario', auth, async (req, res)=>{
@@ -306,6 +312,14 @@ function routes(app){
         let {id_tema, nombre, apellido, email, contrasena, fecha_creacion, fecha_nacimiento, sin_perro } = req.body;
         
         try {
+            const existingUser = await sql`
+                SELECT * FROM usuarios
+                WHERE email = ${email}
+            `;
+
+            if (existingUser.length > 0) {
+                return res.status(409).json({ mensaje: 'Correo electrónico ya registrado.' });
+            }
 
             const hashedPassword = await bcrypt.hash(contrasena, 10);
     
