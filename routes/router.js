@@ -456,6 +456,24 @@ function routes(app){
         }
       });
 
+      app.put('/deshabilitarPerro/:id_perro', auth, async (req, res) => {
+        const id_perro = req.params.id_perro;
+        const { deshabilitado } = req.body;
+
+        try {
+            const deshabilitarPerro = await sql`
+              UPDATE perros
+              SET deshabilitado = ${deshabilitado}
+              WHERE id_perro = ${id_perro}
+            `;
+
+            res.status(200).json({ mensaje: 'El perro se ha guardado en historial correctamente' });
+          } catch (error) {
+            console.error('Error al mandar al historial de perros:', error);
+            res.status(500).json({ mensaje: 'Error al guardar en historial de perros' });
+          }
+      });
+
       //DELETE
 
       app.delete('/eliminarUsuario/:id_usuario', auth, async (req, res) => {
