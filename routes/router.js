@@ -546,12 +546,17 @@ function routes(app){
         where email = ${req.query.email}
         `
 
+        if (response.length === 0) {
+            // Administrador no encontrado
+            return res.json({ success: false, message: 'Administrador no encontrado' });
+        }
+
         bcrypt.compare(req.query.contrasena, response[0].contrasena, function(err, result) {
             if (!result){
-                res.send(false)
+                res.json({ success: false, message: 'Contraseña incorrecta' });
             }else{
                 let token = jwt.sign({"administrador": response[0].id_administrador},'adminanything')
-                res.json({token})
+                    res.json({ success: true, token });
             }
         });
         }
